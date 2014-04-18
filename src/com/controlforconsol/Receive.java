@@ -14,7 +14,7 @@ import java.net.UnknownHostException;
 import android.os.StrictMode;
 
 /**
- * A thread that can receive information from the server
+ * A thread that can receive information from the console
  * @author LgLinuss
  *
  */
@@ -28,17 +28,16 @@ public class Receive extends Thread {
 	}
 
 	/**
-	 * Körs när tråden startas
+	 * Run the thread
 	 */
 	@Override
-	public void run() {StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
+	public void run() {
+		StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
 	.detectAll().penaltyLog().build(); 
 		while (true) {
 			if (main.receiveSocket == null) {
 				try {
 					main.receiveSocket = new ServerSocket(main.SERVERRECEIVEPORT);
-					// Get the client message
-					System.out.println("WOOP");
 
 				} catch (IOException e) {
 					System.out.println(e);

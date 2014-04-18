@@ -19,6 +19,10 @@ public class Values {
 	public static final String SENDDOWNRELEASED = "12";
 	public static final String SENDACTIONPRESSED = "13";
 	public static final String SENDACTIONRELEASED = "14";
+	public static final String SENDAPRESSED = "15";
+	public static final String SENDARELEASED = "16";
+	public static final String SENDBPRESSED = "17";
+	public static final String SENDBRELEASED = "18";
 	public static final String SENDRIGHT = "6";
 	public static final String SENDSPACE = "7";
 }

@@ -10,7 +10,7 @@ import android.graphics.drawable.StateListDrawable;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
-import android.text.format.Formatter;
+import android.os.Vibrator;
 import android.view.Display;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -26,37 +26,28 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 /**
- * The general layout for the remote
- * V0.1
+ * The general layout for the remote V0.2
+ * 
  * @author LgLinus
- *
+ * 
  */
 public class General extends Activity {
 
 	private int width;
 	private int height;
-	private RelativeLayout rlTop;
-	private LinearLayout layoutAllBottom;
-	private RelativeLayout layoutLeft;
-	private RelativeLayout layoutMiddle;
 	private TextView tvPlayer;
-	private ImageButton btnAction;
-	private ImageButton btnLeft;
-	private ImageButton btnUp;
-	private ImageButton btnRight;
-	private ImageButton btnDown;
+	private LinearLayout layoutAllBottom;
+	private RelativeLayout layoutLeft, layoutMiddle, rlTop;
+	private ImageButton btnAction, btnLeft, btnUp, btnRight, btnDown, btnA,
+			btnB;
 	private Button btnReconnect;
-	private StateListDrawable stateButtonUp;
-	private StateListDrawable stateButtonDown;
-	private StateListDrawable stateButtonRight;
-	private StateListDrawable stateButtonLeft;
-	private StateListDrawable stateButtonAction;
-	public Socket socket;
-	public String SERVERIP = "10.1.16.170";
+	private StateListDrawable stateButtonUp, stateButtonDown, stateButtonRight,
+			stateButtonLeft, stateButtonAction, stateButtonA, stateButtonB;
+	public String SERVERIP = "10.1.1.161";
 	public int SERVERPORT = 8080;
 	public int SERVERRECEIVEPORT = 8081;
 	public ServerSocket receiveSocket;
-	public Socket receiveClientSocket;
+	public Socket receiveClientSocket, socket;;
 	private Receive receiveThread = null;
 	private Press sendThread = null;
 	private OnTouchListener buttonListener;
@@ -71,13 +62,6 @@ public class General extends Activity {
 		initializeThreads();
 		setActionListeners();
 		// sendIp();
-	}
-
-	private void initializeThreads() {
-		receiveThread = new Receive(this);
-		receiveThread.start();
-		sendThread = new Press(this);
-		sendThread.start();
 	}
 
 	/**
@@ -105,6 +89,8 @@ public class General extends Activity {
 		btnUp = new ImageButton(this);
 		btnRight = new ImageButton(this);
 		btnLeft = new ImageButton(this);
+		btnA = new ImageButton(this);
+		btnB = new ImageButton(this);
 
 		tvPlayer = new TextView(this);
 
@@ -121,7 +107,7 @@ public class General extends Activity {
 		params.width = width;
 		layoutAllBottom.setOrientation(LinearLayout.HORIZONTAL);
 		// layoutAllBottom.setBackgroundColor(Color.GREEN);
-		
+
 		btnReconnect = new Button(this);
 		btnReconnect.setHeight((int) (size.y * 0.15));
 		btnReconnect.setWidth((int) (size.x * 0.25));
@@ -136,7 +122,7 @@ public class General extends Activity {
 		layoutAllBottom.addView(layoutMiddle);
 		params = layoutMiddle.getLayoutParams();
 		params.height = (height - rlTop.getHeight());
-		params.width = ((int) (width * 0.5));
+		params.width = ((int) (width * 0.75));
 		// layoutMiddle.setBackgroundColor(Color.RED);
 
 		layoutMiddle.addView(btnAction);
@@ -150,7 +136,7 @@ public class General extends Activity {
 		btnAction.setY((int) (height / 3.5));
 		btnAction.setPadding(0, 0, 0, 50);
 
-		//** Add navigation buttons **
+		// ** Add navigation buttons **
 		layoutLeft.addView(btnDown);
 		params = btnDown.getLayoutParams();
 		params.width = arrowButtonWidth;
@@ -191,8 +177,30 @@ public class General extends Activity {
 		btnLeft.setBackground(null);
 		btnLeft.setScaleType(ScaleType.FIT_XY);
 
-		//** End of navigation buttons **
-		
+		// ** End of navigation buttons **
+
+		// A and B buttons
+
+		layoutMiddle.addView(btnA);
+		params = btnA.getLayoutParams();
+		params.width = arrowButtonWidth;
+		params.height = (int) (arrowButtonHeight);
+		btnA.setImageDrawable(stateButtonA);
+		btnA.setX((int) (width * 0.6));
+		btnA.setY((int) (height * 0.10));
+		btnA.setBackground(null);
+		btnA.setScaleType(ScaleType.FIT_XY);
+
+		layoutMiddle.addView(btnB);
+		params = btnB.getLayoutParams();
+		params.width = arrowButtonWidth;
+		params.height = (int) (arrowButtonHeight);
+		btnB.setImageDrawable(stateButtonB);
+		btnB.setX((int) (width * 0.5));
+		btnB.setY((int) (height * 0.20));
+		btnB.setBackground(null);
+		btnB.setScaleType(ScaleType.FIT_XY);
+
 		tvPlayer.setText("Player: 1");
 		tvPlayer.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,
 				LayoutParams.WRAP_CONTENT));
@@ -204,6 +212,68 @@ public class General extends Activity {
 				.getLayoutParams();
 		rlParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
 
+	}
+
+	/**
+	 * Set listeners to each buttons, so we can detect when they are pressed and
+	 * released
+	 */
+	public void setActionListeners() {
+		buttonListener = new ButtonDownListener(this);
+		btnLeft.setOnTouchListener(buttonListener);
+		btnRight.setOnTouchListener(buttonListener);
+		btnUp.setOnTouchListener(new ButtonDownListener(this));
+		btnDown.setOnTouchListener(buttonListener);
+		btnAction.setOnTouchListener(buttonListener);
+		btnReconnect.setOnTouchListener(buttonListener);
+		btnA.setOnTouchListener(buttonListener);
+		btnB.setOnTouchListener(buttonListener);
+	}
+
+	/**
+	 * Reestablish connection to the console by setting the socket to null.
+	 */
+	public void reconnect() {
+		this.socket = null;// Försök upprätta en anslutning till servern
+	}
+
+	/**
+	 * Send the ip of the current device
+	 */
+	public void sendIp() {
+		WifiManager wifiManager = (WifiManager) getSystemService(WIFI_SERVICE);
+		WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+		int ipAddress = wifiInfo.getIpAddress();
+		String ip = intToIp(ipAddress);
+		sendThread.send(ip);
+	}
+
+	/**
+	 * Return the given ip int as a String
+	 * 
+	 * @param i
+	 *            ip to convert
+	 * @return converted int to string
+	 */
+	public String intToIp(int i) {
+		return (i & 0xFF) + "." + ((i >> 8) & 0xFF) + "." + ((i >> 16) & 0xFF)
+				+ "." + ((i >> 24) & 0xFF);
+	}
+
+	/** If we press the menu button on the phone */
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		if (keyCode == KeyEvent.KEYCODE_MENU) {
+			System.out.println("Look at my horse, my horse is amazing");
+			return true;
+		}
+		return super.onKeyDown(keyCode, event);
+	}
+
+	private void initializeThreads() {
+		receiveThread = new Receive(this);
+		receiveThread.start();
+		sendThread = new Press(this);
+		sendThread.start();
 	}
 
 	/**
@@ -251,16 +321,30 @@ public class General extends Activity {
 		stateButtonAction.addState(new int[] {},
 				getResources().getDrawable(R.drawable.buttonaction));
 
-	}
+		stateButtonAction = new StateListDrawable();
+		stateButtonAction.addState(new int[] { android.R.attr.state_pressed },
+				getResources().getDrawable(R.drawable.buttonactionpressed));
+		stateButtonAction.addState(new int[] { android.R.attr.state_focused },
+				getResources().getDrawable(R.drawable.buttonaction));
+		stateButtonAction.addState(new int[] {},
+				getResources().getDrawable(R.drawable.buttonaction));
 
-	public void setActionListeners() {
-		buttonListener = new ButtonDownListener(this);
-		btnLeft.setOnTouchListener(buttonListener);
-		btnRight.setOnTouchListener(buttonListener);
-		btnUp.setOnTouchListener(new ButtonDownListener(this));
-		btnDown.setOnTouchListener(buttonListener);
-		btnAction.setOnTouchListener(buttonListener);
-		btnReconnect.setOnTouchListener(buttonListener);
+		stateButtonA = new StateListDrawable();
+		stateButtonA.addState(new int[] { android.R.attr.state_pressed },
+				getResources().getDrawable(R.drawable.buttonpipressed));
+		stateButtonA.addState(new int[] { android.R.attr.state_focused },
+				getResources().getDrawable(R.drawable.buttonpi));
+		stateButtonA.addState(new int[] {},
+				getResources().getDrawable(R.drawable.buttonpi));
+
+		stateButtonB = new StateListDrawable();
+		stateButtonB.addState(new int[] { android.R.attr.state_pressed },
+				getResources().getDrawable(R.drawable.buttonomegapressed));
+		stateButtonB.addState(new int[] { android.R.attr.state_focused },
+				getResources().getDrawable(R.drawable.buttonomega));
+		stateButtonB.addState(new int[] {},
+				getResources().getDrawable(R.drawable.buttonomega));
+
 	}
 
 	private class ButtonDownListener implements OnTouchListener {
@@ -274,67 +358,69 @@ public class General extends Activity {
 
 		public boolean onTouch(View v, MotionEvent event) {
 			if (v == btnLeft) {
-				if (event.getAction() == MotionEvent.ACTION_DOWN)
+				if (event.getAction() == MotionEvent.ACTION_DOWN) {
 					sendThread.send(Values.SENDLEFTPRESSED);
-				else if (event.getAction() == MotionEvent.ACTION_UP)
+					Vibrator vib = (Vibrator) getApplicationContext()
+							.getSystemService(Context.VIBRATOR_SERVICE);
+					vib.vibrate(20);
+				} else if (event.getAction() == MotionEvent.ACTION_UP)
 					sendThread.send(Values.SENDLEFTRELEASED);
 			} else if (v == btnUp) {
-				if (event.getAction() == MotionEvent.ACTION_DOWN)
+				if (event.getAction() == MotionEvent.ACTION_DOWN) {
 					sendThread.send(Values.SENDUPPRESSED);
-				else if (event.getAction() == MotionEvent.ACTION_UP)
+					Vibrator vib = (Vibrator) getApplicationContext()
+							.getSystemService(Context.VIBRATOR_SERVICE);
+					vib.vibrate(20);
+				} else if (event.getAction() == MotionEvent.ACTION_UP)
 					sendThread.send(Values.SENDUPRELEASED);
 			} else if (v == btnDown) {
-				if (event.getAction() == MotionEvent.ACTION_DOWN)
+				if (event.getAction() == MotionEvent.ACTION_DOWN) {
 					sendThread.send(Values.SENDDOWNPRESSED);
-				else if (event.getAction() == MotionEvent.ACTION_UP)
+					Vibrator vib = (Vibrator) getApplicationContext()
+							.getSystemService(Context.VIBRATOR_SERVICE);
+					vib.vibrate(20);
+				} else if (event.getAction() == MotionEvent.ACTION_UP)
 					sendThread.send(Values.SENDDOWNRELEASED);
 			} else if (v == btnRight) {
-				if (event.getAction() == MotionEvent.ACTION_DOWN)
+				if (event.getAction() == MotionEvent.ACTION_DOWN) {
 					sendThread.send(Values.SENDRIGHTPRESSED);
-				else if (event.getAction() == MotionEvent.ACTION_UP)
+					Vibrator vib = (Vibrator) getApplicationContext()
+							.getSystemService(Context.VIBRATOR_SERVICE);
+					vib.vibrate(20);
+				} else if (event.getAction() == MotionEvent.ACTION_UP)
 					sendThread.send(Values.SENDRIGHTRELEASED);
 			} else if (v == btnAction) {
-				if (event.getAction() == MotionEvent.ACTION_DOWN)
+				if (event.getAction() == MotionEvent.ACTION_DOWN) {
 					sendThread.send(Values.SENDRIGHTPRESSED);
-				else if (event.getAction() == MotionEvent.ACTION_UP)
+					Vibrator vib = (Vibrator) getApplicationContext()
+							.getSystemService(Context.VIBRATOR_SERVICE);
+					vib.vibrate(20);
+				} else if (event.getAction() == MotionEvent.ACTION_UP)
 					sendThread.send(Values.SENDSPACE);
 			} else if (v == btnReconnect) {
 				if (event.getAction() == MotionEvent.ACTION_UP)
-					sendIp();
+					reconnect();
+			} else if (v == btnA) {
+				System.out.println("A");
+				if (event.getAction() == MotionEvent.ACTION_DOWN) {
+					sendThread.send(Values.SENDAPRESSED);
+					Vibrator vib = (Vibrator) getApplicationContext()
+							.getSystemService(Context.VIBRATOR_SERVICE);
+					vib.vibrate(20);
+				} else if (event.getAction() == MotionEvent.ACTION_UP)
+					sendThread.send(Values.SENDARELEASED);
+			} else if (v == btnB) {
+				System.out.println("B");
+				if (event.getAction() == MotionEvent.ACTION_DOWN) {
+					sendThread.send(Values.SENDBPRESSED);
+					Vibrator vib = (Vibrator) getApplicationContext()
+							.getSystemService(Context.VIBRATOR_SERVICE);
+					vib.vibrate(20);
+				} else if (event.getAction() == MotionEvent.ACTION_UP)
+					sendThread.send(Values.SENDBRELEASED);
 			}
 			return pressed;
 		}
 
-	}
-
-	/**
-	 * Send the ip of the current device
-	 */
-	public void sendIp() {
-		WifiManager wifiManager = (WifiManager) getSystemService(WIFI_SERVICE);
-		WifiInfo wifiInfo = wifiManager.getConnectionInfo();
-		int ipAddress = wifiInfo.getIpAddress();
-		String ip = intToIp(ipAddress);
-		sendThread.send(ip);
-	}
-
-	/**
-	 * Return the given ip int as a String
-	 * 
-	 * @param i
-	 *            ip to convert
-	 * @return converted int to string
-	 */
-	public String intToIp(int i) {
-		return (i & 0xFF) + "." + ((i >> 8) & 0xFF) + "." + ((i >> 16) & 0xFF)
-				+ "." + ((i >> 24) & 0xFF);
-	}
-
-	public boolean onKeyDown(int keyCode, KeyEvent event) {
-		if (keyCode == KeyEvent.KEYCODE_MENU) {
-			System.out.println("Look at my horse, my horse is amazing");
-			return true;
-		}
-		return super.onKeyDown(keyCode, event);
 	}
 }

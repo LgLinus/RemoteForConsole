@@ -27,11 +27,15 @@ public final class R {
         public static final int buttondownpressed=0x7f020003;
         public static final int buttonleft=0x7f020004;
         public static final int buttonleftpressed=0x7f020005;
-        public static final int buttonright=0x7f020006;
-        public static final int buttonrightpressed=0x7f020007;
-        public static final int buttonup=0x7f020008;
-        public static final int buttonuppressed=0x7f020009;
-        public static final int ic_launcher=0x7f02000a;
+        public static final int buttonomega=0x7f020006;
+        public static final int buttonomegapressed=0x7f020007;
+        public static final int buttonpi=0x7f020008;
+        public static final int buttonpipressed=0x7f020009;
+        public static final int buttonright=0x7f02000a;
+        public static final int buttonrightpressed=0x7f02000b;
+        public static final int buttonup=0x7f02000c;
+        public static final int buttonuppressed=0x7f02000d;
+        public static final int ic_launcher=0x7f02000e;
     }
     public static final class id {
         public static final int action_settings=0x7f080001;
