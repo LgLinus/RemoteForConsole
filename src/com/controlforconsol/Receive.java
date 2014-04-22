@@ -15,8 +15,9 @@ import android.os.StrictMode;
 
 /**
  * A thread that can receive information from the console
+ * 
  * @author LgLinuss
- *
+ * 
  */
 public class Receive extends Thread {
 	General main = null;
@@ -33,37 +34,34 @@ public class Receive extends Thread {
 	@Override
 	public void run() {
 		StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder()
-	.detectAll().penaltyLog().build(); 
-		while (true) {
-			if (main.receiveSocket == null) {
-				try {
-					main.receiveSocket = new ServerSocket(main.SERVERRECEIVEPORT);
+				.detectAll().penaltyLog().build();
+		try {
+			main.receiveSocket = new ServerSocket(main.SERVERRECEIVEPORT);
 
-				} catch (IOException e) {
-					System.out.println(e);
+			while (true) {
+				if (main.receiveSocket != null
+						&& main.receiveClientSocket == null) {
+					try {
+						main.receiveClientSocket = main.receiveSocket.accept(); // Accept
+
+						bufferedReader = new BufferedReader(
+								new InputStreamReader(
+										main.receiveClientSocket
+												.getInputStream()));
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+
 				}
+				String inputLine = null;
+				if ((bufferedReader != null && (inputLine = bufferedReader
+						.readLine()) != null))
+					System.out.println(inputLine); // Print out the information
+													// in the console
 			}
 
-			if(main.receiveSocket!=null&&main.receiveClientSocket==null)
-			{
-				try {main.receiveClientSocket = main.receiveSocket.accept(); // Accept
-				
-					bufferedReader = new BufferedReader(new InputStreamReader(
-							main.receiveClientSocket.getInputStream()));
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-
-			}
-			String inputLine = null;
-			try {
-				if ((bufferedReader!=null && (inputLine = bufferedReader.readLine()) != null))
-					System.out.println(inputLine); // Print out the information in the console
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-
+		} catch (IOException e) {
+			System.out.println(e);
 		}
 	}
-
 }

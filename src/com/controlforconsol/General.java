@@ -43,9 +43,8 @@ public class General extends Activity {
 	private Button btnReconnect;
 	private StateListDrawable stateButtonUp, stateButtonDown, stateButtonRight,
 			stateButtonLeft, stateButtonAction, stateButtonA, stateButtonB;
-	public String SERVERIP = "10.1.1.161";
-	public int SERVERPORT = 8080;
-	public int SERVERRECEIVEPORT = 8081;
+	public String SERVERIP = "10.1.16.170";
+	public int SERVERPORT = 8080,SERVERRECEIVEPORT = 8081;
 	public ServerSocket receiveSocket;
 	public Socket receiveClientSocket, socket;;
 	private Receive receiveThread = null;
@@ -61,7 +60,6 @@ public class General extends Activity {
 		createLayout();
 		initializeThreads();
 		setActionListeners();
-		// sendIp();
 	}
 
 	/**
@@ -177,8 +175,6 @@ public class General extends Activity {
 		btnLeft.setBackground(null);
 		btnLeft.setScaleType(ScaleType.FIT_XY);
 
-		// ** End of navigation buttons **
-
 		// A and B buttons
 
 		layoutMiddle.addView(btnA);
@@ -219,10 +215,10 @@ public class General extends Activity {
 	 * released
 	 */
 	public void setActionListeners() {
-		buttonListener = new ButtonDownListener(this);
+		buttonListener = new ButtonDownListener();
 		btnLeft.setOnTouchListener(buttonListener);
 		btnRight.setOnTouchListener(buttonListener);
-		btnUp.setOnTouchListener(new ButtonDownListener(this));
+		btnUp.setOnTouchListener(new ButtonDownListener());
 		btnDown.setOnTouchListener(buttonListener);
 		btnAction.setOnTouchListener(buttonListener);
 		btnReconnect.setOnTouchListener(buttonListener);
@@ -234,7 +230,7 @@ public class General extends Activity {
 	 * Reestablish connection to the console by setting the socket to null.
 	 */
 	public void reconnect() {
-		this.socket = null;// Försök upprätta en anslutning till servern
+		this.socket = null;
 	}
 
 	/**
@@ -348,11 +344,6 @@ public class General extends Activity {
 	}
 
 	private class ButtonDownListener implements OnTouchListener {
-		private General general;
-
-		public ButtonDownListener(General general) {
-			this.general = general;
-		}
 
 		boolean pressed = false;
 
