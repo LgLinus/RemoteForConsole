@@ -41,7 +41,9 @@ public class Press extends Thread {
 				try {
 					InetAddress serverAddress = InetAddress
 							.getByName(main.SERVERIP);
+					System.out.println("CONNECT GODDAMIT");
 					main.socket = new Socket(serverAddress, main.SERVERPORT); // Try and establish connection to the server
+					System.out.println("CONNECT GODDAMIT");
 					this.sleep(1000);
 					main.sendIp(); // Send the devices ip to the server, so the server can reach the device
 				} catch (UnknownHostException e1) {

@@ -1,5 +1,6 @@
 package com.controlforconsol;
 
+import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -43,8 +44,8 @@ public class General extends Activity {
 	private Button btnReconnect;
 	private StateListDrawable stateButtonUp, stateButtonDown, stateButtonRight,
 			stateButtonLeft, stateButtonAction, stateButtonA, stateButtonB;
-	public String SERVERIP = "10.1.16.147";
-//	public String SERVERIP = "10.1.16.170";
+//	public String SERVERIP = "10.1.16.147";
+	public String SERVERIP = "10.1.16.170";
 	public int SERVERPORT = 8080,SERVERRECEIVEPORT = 8081;
 	public ServerSocket receiveSocket;
 	public Socket receiveClientSocket, socket;;
@@ -210,7 +211,47 @@ public class General extends Activity {
 		rlParams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
 
 	}
+	
 
+	@Override
+	protected void onDestroy(){
+		try {
+			this.socket.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		super.onDestroy();
+	}
+	 public void finish() {
+	        /*
+	         * This can only invoked by the user or the app finishing the activity
+	         * by navigating from the activity so the HOME key was not pressed.
+	         */
+			try {
+				this.socket.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	        super.finish();
+	    }
+
+	    public void onStop() {
+	        super.onStop();
+
+	        /*
+	         * Check if the HOME key was pressed. If the HOME key was pressed then
+	         * the app will be killed. Otherwise the user or the app is navigating
+	         * away from this activity so assume that the HOME key will be pressed
+	         * next unless a navigation event by the user or the app occurs.
+	         */		try {
+	 			this.socket.close();
+	 		} catch (IOException e) {
+	 			// TODO Auto-generated catch block
+	 			e.printStackTrace();
+	 		}
+	    }
 	/**
 	 * Set listeners to each buttons, so we can detect when they are pressed and
 	 * released
@@ -231,6 +272,12 @@ public class General extends Activity {
 	 * Reestablish connection to the console by setting the socket to null.
 	 */
 	public void reconnect() {
+		try {
+			this.socket.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		this.socket = null;
 	}
 
@@ -415,4 +462,6 @@ public class General extends Activity {
 		}
 
 	}
+	
+
 }
