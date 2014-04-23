@@ -213,45 +213,6 @@ public class General extends Activity {
 	}
 	
 
-	@Override
-	protected void onDestroy(){
-		try {
-			this.socket.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		super.onDestroy();
-	}
-	 public void finish() {
-	        /*
-	         * This can only invoked by the user or the app finishing the activity
-	         * by navigating from the activity so the HOME key was not pressed.
-	         */
-			try {
-				this.socket.close();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-	        super.finish();
-	    }
-
-	    public void onStop() {
-	        super.onStop();
-
-	        /*
-	         * Check if the HOME key was pressed. If the HOME key was pressed then
-	         * the app will be killed. Otherwise the user or the app is navigating
-	         * away from this activity so assume that the HOME key will be pressed
-	         * next unless a navigation event by the user or the app occurs.
-	         */		try {
-	 			this.socket.close();
-	 		} catch (IOException e) {
-	 			// TODO Auto-generated catch block
-	 			e.printStackTrace();
-	 		}
-	    }
 	/**
 	 * Set listeners to each buttons, so we can detect when they are pressed and
 	 * released
