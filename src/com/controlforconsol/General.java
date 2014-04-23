@@ -43,7 +43,8 @@ public class General extends Activity {
 	private Button btnReconnect;
 	private StateListDrawable stateButtonUp, stateButtonDown, stateButtonRight,
 			stateButtonLeft, stateButtonAction, stateButtonA, stateButtonB;
-	public String SERVERIP = "10.1.16.170";
+	public String SERVERIP = "10.1.16.147";
+//	public String SERVERIP = "10.1.16.170";
 	public int SERVERPORT = 8080,SERVERRECEIVEPORT = 8081;
 	public ServerSocket receiveSocket;
 	public Socket receiveClientSocket, socket;;
