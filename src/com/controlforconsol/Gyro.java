@@ -28,8 +28,7 @@ public class Gyro {
 	private class GyroSender implements SensorEventListener {
 
 		private Controller controller;
-		private int counter;
-		private double totalAngle, previousAngle;
+		private double previousAngle;
 		private int startAngle = 170;
 		private boolean enabled = true;
 		private boolean first = true;
@@ -59,14 +58,7 @@ public class Gyro {
 				if (event.accuracy == SensorManager.SENSOR_STATUS_UNRELIABLE) {
 					return;
 				}
-
-				// float xy_angle = event.values[0]; Saved for possible future
-				// use.
-				// float xz_angle = event.values[1];
 				float zy_angle = event.values[2];
-				totalAngle += zy_angle;
-				counter++;
-
 				try {
 					Thread.sleep(5);
 				} catch (InterruptedException e) {
@@ -78,31 +70,11 @@ public class Gyro {
 					previousAngle = startAngle;
 				}
 				double angle = zy_angle;
-				totalAngle = 0;
-				counter = 0;
 				angle = startAngle - angle;
 				if ((previousAngle - angle) < -sensitivity
-						|| ((previousAngle - angle) > sensitivity)) { // If the
-																		// device
-																		// have
-																		// been
-																		// tilted
-																		// at
-																		// least
-																		// @var
-																		// sensitivity
-																		// since
-																		// we
-																		// sent
-																		// last
-																		// message,
-																		// send
-																		// a new
-																		// one
-																		// and
-																		// update
-																		// the
-																		// angle
+						|| ((previousAngle - angle) > sensitivity)) {// If the device have been tilted at least @var sensitivity since we sent last message,e send a new one and update the angle
+
+					
 					controller.getSendThread().send("Gyro:" + (int) angle);
 					previousAngle = angle;
 				}

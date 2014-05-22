@@ -22,7 +22,7 @@
         android:label="@string/app_name"
         android:theme="@android:style/Theme.NoTitleBar" >
         <activity
-            android:name="com.controlforconsol.Startup"
+            android:name="com.controlforconsol.General"
             android:configChanges="orientation|keyboardHidden"
             android:label="@string/app_name"
             android:screenOrientation="landscape" >
@@ -34,15 +34,6 @@
         </activity>
         <activity
             android:name="com.controlforconsol.DynamicLayout"
-            android:configChanges="orientation|keyboardHidden|screenSize"
-            android:label="@string/app_name"
-            android:theme="@android:style/Theme.NoTitleBar" >
-            <intent-filter>
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-         <activity
-            android:name="com.controlforconsol.General"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/app_name"
             android:theme="@android:style/Theme.NoTitleBar" >
